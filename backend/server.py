@@ -86,6 +86,15 @@ class ProgressStats(BaseModel):
     weekly_progress: List[int]  # Last 7 days
     monthly_progress: List[int]  # Last 30 days
 
+class AIInsightRequest(BaseModel):
+    context: Optional[str] = None
+
+class AIInsight(BaseModel):
+    insight_type: str  # 'tip', 'motivation', 'suggestion', 'impact'
+    title: str
+    content: str
+    emoji: str
+
 # Utility functions
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)

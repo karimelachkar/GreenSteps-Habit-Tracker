@@ -236,10 +236,19 @@ class GreenStepsAPITest(unittest.TestCase):
         print(f"✅ Unauthorized access correctly rejected")
 
 if __name__ == "__main__":
-    # Run tests in order
-    test_loader = unittest.TestLoader()
-    test_loader.sortTestMethodsUsing = lambda x, y: -1 if x < y else 1 if x > y else 0
+    # Run tests in specific order
+    test_suite = unittest.TestSuite()
+    test_suite.addTest(GreenStepsAPITest('test_01_signup'))
+    test_suite.addTest(GreenStepsAPITest('test_02_login_with_wrong_password'))
+    test_suite.addTest(GreenStepsAPITest('test_03_login'))
+    test_suite.addTest(GreenStepsAPITest('test_04_get_user_info'))
+    test_suite.addTest(GreenStepsAPITest('test_05_get_preset_habits'))
+    test_suite.addTest(GreenStepsAPITest('test_06_create_preset_habit'))
+    test_suite.addTest(GreenStepsAPITest('test_07_create_custom_habit'))
+    test_suite.addTest(GreenStepsAPITest('test_08_get_habits'))
+    test_suite.addTest(GreenStepsAPITest('test_09_get_progress'))
+    test_suite.addTest(GreenStepsAPITest('test_10_delete_habit'))
+    test_suite.addTest(GreenStepsAPITest('test_11_unauthorized_access'))
     
-    test_suite = test_loader.loadTestsFromTestCase(GreenStepsAPITest)
     test_runner = unittest.TextTestRunner(verbosity=2)
     test_runner.run(test_suite)

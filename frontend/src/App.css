@@ -1,38 +1,140 @@
-.App {
-    text-align: center;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+::-webkit-scrollbar-track {
+  @apply bg-gray-800;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded-full;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
 }
 
-.App-link {
-    color: #61dafb;
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Custom focus styles */
+.focus-visible {
+  @apply outline-none ring-2 ring-green-500 ring-offset-2 ring-offset-gray-900;
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: linear-gradient(135deg, #10b981, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Custom button hover effects */
+.btn-hover {
+  @apply transform transition-all duration-200 hover:scale-105 active:scale-95;
+}
+
+/* Loading animation */
+.loading-spinner {
+  @apply animate-spin inline-block w-6 h-6 border-4 border-green-400 border-t-transparent rounded-full;
+}
+
+/* Card hover effects */
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+}
+
+/* Progress bar animation */
+.progress-bar {
+  animation: progress-fill 1s ease-out forwards;
+}
+
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+}
+
+/* Habit card animations */
+.habit-card {
+  @apply transition-all duration-300 hover:bg-gray-700 hover:scale-102;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 640px) {
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 z-50;
+  }
+  
+  .mobile-nav button {
+    @apply flex-1 py-4 text-xs flex flex-col items-center space-y-1;
+  }
+}
+
+/* Dark theme form inputs */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+textarea, 
+select {
+  @apply bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-green-500 focus:ring-green-500;
+}
+
+/* Success animations */
+.success-pulse {
+  animation: pulse-green 0.6s ease-in-out;
+}
+
+@keyframes pulse-green {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* Error state styles */
+.error-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Stats card styles */
+.stats-card {
+  @apply bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 hover:border-green-500;
+}
+
+/* Streak fire animation */
+.streak-fire {
+  animation: fire-flicker 1.5s infinite alternate;
+}
+
+@keyframes fire-flicker {
+  0% { 
+    transform: scale(1) rotate(-1deg);
+    filter: hue-rotate(0deg);
+  }
+  100% { 
+    transform: scale(1.05) rotate(1deg);
+    filter: hue-rotate(10deg);
+  }
 }

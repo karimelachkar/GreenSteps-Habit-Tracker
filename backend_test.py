@@ -235,6 +235,52 @@ class GreenStepsAPITest(unittest.TestCase):
         
         print(f"✅ Unauthorized access correctly rejected")
 
+    def test_12_ai_insights(self):
+        """Test AI Sustainability Coach insights"""
+        print(f"\n🔍 Testing AI insights...")
+        
+        # Ensure we have a valid token
+        if not self.__class__.token:
+            self.skipTest("No valid token available for AI insights test")
+        
+        response = requests.post(
+            f"{self.api_url}/api/ai/insights",
+            json={},  # Empty context is fine
+            headers={"Authorization": f"Bearer {self.__class__.token}"}
+        )
+        
+        self.assertEqual(response.status_code, 200, f"AI insights request failed: {response.text}")
+        insights = response.json()
+        
+        # Verify we got exactly 3 insights
+        self.assertEqual(len(insights), 3, f"Expected 3 insights, got {len(insights)}")
+        
+        # Verify each insight has the required fields
+        required_fields = ["insight_type", "title", "content", "emoji"]
+        insight_types = []
+        
+        for insight in insights:
+            for field in required_fields:
+                self.assertIn(field, insight, f"Missing field in insight: {field}")
+            
+            # Collect insight types to verify we have all three types
+            insight_types.append(insight["insight_type"])
+            
+            # Verify content is not empty
+            self.assertTrue(len(insight["content"]) > 0, "Insight content should not be empty")
+            
+            # Verify emoji is present
+            self.assertTrue(len(insight["emoji"]) > 0, "Insight emoji should not be empty")
+        
+        # Verify we have the three expected insight types
+        expected_types = ["tip", "motivation", "suggestion"]
+        for expected_type in expected_types:
+            self.assertIn(expected_type, insight_types, f"Missing insight type: {expected_type}")
+        
+        print(f"✅ AI insights retrieved successfully")
+        for i, insight in enumerate(insights):
+            print(f"   Insight {i+1}: {insight['insight_type']} - {insight['title']} {insight['emoji']}")
+
 if __name__ == "__main__":
     # Run tests in specific order
     test_suite = unittest.TestSuite()
@@ -249,6 +295,7 @@ if __name__ == "__main__":
     test_suite.addTest(GreenStepsAPITest('test_09_get_progress'))
     test_suite.addTest(GreenStepsAPITest('test_10_delete_habit'))
     test_suite.addTest(GreenStepsAPITest('test_11_unauthorized_access'))
+    test_suite.addTest(GreenStepsAPITest('test_12_ai_insights'))
     
     test_runner = unittest.TextTestRunner(verbosity=2)
     test_runner.run(test_suite)

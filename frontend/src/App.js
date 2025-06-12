@@ -38,6 +38,7 @@ function App() {
     if (user) {
       fetchHabits();
       fetchProgressStats();
+      fetchAiInsights();
     }
   }, [user]);
 

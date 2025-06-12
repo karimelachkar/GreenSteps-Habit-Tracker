@@ -11,6 +11,7 @@ function App() {
   const [habits, setHabits] = useState([]);
   const [progressStats, setProgressStats] = useState(null);
   const [presetHabits, setPresetHabits] = useState([]);
+  const [aiInsights, setAiInsights] = useState([]);
   const [error, setError] = useState('');
 
   // Auth states

@@ -145,6 +145,7 @@ function App() {
       setHabitForm({ habit_type: 'preset', habit_name: '', description: '' });
       await fetchHabits();
       await fetchProgressStats();
+      await fetchAiInsights();
       setCurrentView('dashboard');
     } catch (error) {
       setError(error.response?.data?.detail || 'Failed to add habit');

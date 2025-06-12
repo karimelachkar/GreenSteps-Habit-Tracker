@@ -39,6 +39,7 @@ function App() {
       fetchHabits();
       fetchProgressStats();
       fetchAiInsights();
+      fetchAiInsights();
     }
   }, [user]);
 

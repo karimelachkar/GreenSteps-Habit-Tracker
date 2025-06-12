@@ -90,6 +90,20 @@ function App() {
     }
   };
 
+  const fetchAiInsights = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${API_BASE_URL}/api/ai/insights`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAiInsights(response.data);
+    } catch (error) {
+      console.error('Error fetching AI insights:', error);
+      // Set empty array on error to prevent UI issues
+      setAiInsights([]);
+    }
+  };
+
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');

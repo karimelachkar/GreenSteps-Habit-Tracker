@@ -367,6 +367,41 @@ function App() {
               </div>
             </div>
 
+            {/* AI Insights */}
+            {aiInsights.length > 0 && (
+              <div className="bg-gray-800 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-green-400">🤖 Your AI Sustainability Coach</h3>
+                  <button
+                    onClick={fetchAiInsights}
+                    className="text-sm text-blue-400 hover:text-blue-300 transition duration-200"
+                  >
+                    Refresh Tips
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {aiInsights.map((insight, index) => (
+                    <div key={index} className="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition duration-200">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-2xl">{insight.emoji}</span>
+                        <h4 className="font-medium text-green-400">{insight.title}</h4>
+                      </div>
+                      <p className="text-sm text-gray-300">{insight.content}</p>
+                      <div className="mt-2">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          insight.insight_type === 'tip' ? 'bg-blue-900 text-blue-300' :
+                          insight.insight_type === 'motivation' ? 'bg-purple-900 text-purple-300' :
+                          'bg-green-900 text-green-300'
+                        }`}>
+                          {insight.insight_type}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Recent Habits */}
             {habits.slice(0, 3).length > 0 && (
               <div className="bg-gray-800 rounded-lg p-6">

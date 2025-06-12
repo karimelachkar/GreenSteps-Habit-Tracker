@@ -238,7 +238,7 @@ class GreenStepsAPITest(unittest.TestCase):
 if __name__ == "__main__":
     # Run tests in order
     test_loader = unittest.TestLoader()
-    test_loader.sortTestMethodsUsing = lambda x, y: 1 if x < y else -1 if x > y else 0
+    test_loader.sortTestMethodsUsing = lambda x, y: -1 if x < y else 1 if x > y else 0
     
     test_suite = test_loader.loadTestsFromTestCase(GreenStepsAPITest)
     test_runner = unittest.TextTestRunner(verbosity=2)

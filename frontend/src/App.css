@@ -67,7 +67,7 @@
 
 /* Habit card animations */
 .habit-card {
-  @apply transition-all duration-300 hover:bg-gray-700 hover:scale-102;
+  @apply transition-all duration-300 hover:bg-gray-700 hover:scale-105;
 }
 
 /* Mobile-first responsive design */

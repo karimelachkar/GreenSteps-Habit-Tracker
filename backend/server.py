@@ -304,7 +304,7 @@ async def get_preset_habits():
     preset_habits = [
         {"name": "Recycled items", "description": "Recycled paper, plastic, or other materials"},
         {"name": "Used public transport", "description": "Took bus, train, or other public transportation"},
-        {"name": "Saved water", "description": "Took shorter shower, fixed leaks, or conserved water"},
+        {"name": "Saved water", "description": "Recycled paper, plastic, or other materials"},
         {"name": "Ate plant-based meal", "description": "Had a vegetarian or vegan meal"},
         {"name": "Walked or biked", "description": "Chose walking or cycling over driving"},
         {"name": "Reduced energy usage", "description": "Turned off lights, unplugged devices, or used less AC"},
@@ -314,6 +314,162 @@ async def get_preset_habits():
         {"name": "Planted something", "description": "Planted trees, flowers, or started a garden"}
     ]
     return preset_habits
+
+# AI Insights Endpoint
+@api_router.post("/ai/insights", response_model=List[AIInsight])
+async def get_ai_insights(request: AIInsightRequest, current_user: User = Depends(get_current_user)):
+    if not GEMINI_API_KEY:
+        raise HTTPException(status_code=500, detail="AI service not configured")
+    
+    try:
+        # Get user's habits for context
+        habits = await db.habits.find({"user_id": current_user.id}).sort("date", -1).to_list(100)
+        
+        # Get progress stats
+        now = datetime.utcnow()
+        week_ago = now - timedelta(days=7)
+        month_ago = now - timedelta(days=30)
+        
+        this_week = len([h for h in habits if h["date"] >= week_ago])
+        this_month = len([h for h in habits if h["date"] >= month_ago])
+        
+        # Calculate current streak
+        current_streak = 0
+        if habits:
+            sorted_habits = sorted(habits, key=lambda x: x["date"], reverse=True)
+            current_date = now.date()
+            
+            for i in range(30):
+                check_date = current_date - timedelta(days=i)
+                day_habits = [h for h in sorted_habits if h["date"].date() == check_date]
+                if day_habits:
+                    current_streak += 1
+                else:
+                    break
+        
+        # Get recent habit names
+        recent_habits = [h["habit_name"] for h in habits[:10]]
+        habit_types = list(set([h["habit_name"] for h in habits]))
+        
+        # Create context for AI
+        context = f"""
+        User: {current_user.name}
+        Total habits logged: {len(habits)}
+        Habits this week: {this_week}
+        Habits this month: {this_month}
+        Current streak: {current_streak} days
+        Recent habits: {', '.join(recent_habits[:5])}
+        Habit types tried: {', '.join(habit_types[:8])}
+        """
+        
+        # Create AI chat instance
+        chat = LlmChat(
+            api_key=GEMINI_API_KEY,
+            session_id=f"greensteps_{current_user.id}_{now.timestamp()}",
+            system_message="You are a sustainability coach for GreenSteps app. Generate personalized insights, tips, and motivation for users based on their habit tracking data. Always be encouraging and provide actionable advice."
+        ).with_model("gemini", "gemini-2.0-flash").with_max_tokens(1000)
+        
+        # Create prompt for AI insights
+        prompt = f"""Based on this user's sustainability habit data:
+
+{context}
+
+Generate exactly 3 different types of insights in this JSON format:
+[
+  {{
+    "insight_type": "tip",
+    "title": "Sustainability Tip",
+    "content": "A specific, actionable tip based on their habits",
+    "emoji": "💡"
+  }},
+  {{
+    "insight_type": "motivation",
+    "title": "Motivational Message",
+    "content": "Encouraging message about their progress",
+    "emoji": "🌟"
+  }},
+  {{
+    "insight_type": "suggestion",
+    "title": "New Habit Suggestion",
+    "content": "Suggest a new habit they haven't tried yet",
+    "emoji": "🌱"
+  }}
+]
+
+Rules:
+- Keep content under 150 characters each
+- Be specific to their habit patterns
+- Use encouraging, positive tone
+- Make suggestions actionable
+- Return only valid JSON array"""
+
+        # Get AI response
+        user_message = UserMessage(text=prompt)
+        ai_response = await chat.send_message(user_message)
+        
+        # Parse the AI response (clean it up if needed)
+        import json
+        response_text = ai_response.strip()
+        
+        # Remove potential markdown formatting
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+        
+        try:
+            insights_data = json.loads(response_text)
+        except json.JSONDecodeError:
+            # Fallback insights if AI response isn't valid JSON
+            insights_data = [
+                {
+                    "insight_type": "tip",
+                    "title": "Great Progress!",
+                    "content": f"You've logged {this_week} habits this week! Keep building that momentum.",
+                    "emoji": "💡"
+                },
+                {
+                    "insight_type": "motivation", 
+                    "title": "Streak Power",
+                    "content": f"Your {current_streak}-day streak shows real commitment to sustainability!",
+                    "emoji": "🌟"
+                },
+                {
+                    "insight_type": "suggestion",
+                    "title": "Try Something New",
+                    "content": "Consider starting a small herb garden - it's sustainable and rewarding!",
+                    "emoji": "🌱"
+                }
+            ]
+        
+        # Convert to Pydantic models
+        insights = [AIInsight(**insight) for insight in insights_data]
+        return insights
+        
+    except Exception as e:
+        # Fallback insights in case of any error
+        logger.error(f"AI insights error: {str(e)}")
+        fallback_insights = [
+            AIInsight(
+                insight_type="tip",
+                title="Keep It Up!",
+                content=f"You've made great progress with {len(habits)} sustainable actions!",
+                emoji="💡"
+            ),
+            AIInsight(
+                insight_type="motivation",
+                title="Every Action Counts", 
+                content="Your commitment to sustainability is making a real difference!",
+                emoji="🌟"
+            ),
+            AIInsight(
+                insight_type="suggestion",
+                title="Try Something New",
+                content="Consider adding a new green habit to expand your impact!",
+                emoji="🌱"
+            )
+        ]
+        return fallback_insights
 
 # Include the router in the main app
 app.include_router(api_router)
